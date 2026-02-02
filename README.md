@@ -1,2 +1,2 @@
 # PetWorld
-Zadanie rekrutacyjne - sklep internetowy ze wsparciem AI
+An online store that integrates AI-based features to enhance user experience.
