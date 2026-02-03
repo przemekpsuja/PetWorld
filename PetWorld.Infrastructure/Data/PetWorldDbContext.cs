@@ -37,7 +37,7 @@ public class PetWorldDbContext : DbContext
             new Product { Id = 8, Name = "Brit Premium Kitten 8kg", Category = "Karma dla kotów", Price = 159, Description = "Karma dla kociąt do 12 miesiąca życia" },
             new Product { Id = 9, Name = "JBL ProFlora CO2 Set", Category = "Akwarystyka", Price = 549, Description = "Kompletny zestaw CO2 dla roślin akwariowych" },
             new Product { Id = 10, Name = "Vitapol Siano dla królików 1kg", Category = "Gryzonie", Price = 25, Description = "Naturalne siano łąkowe, podstawa diety" }
-            );
+            );  
     }
 
     #endregion
