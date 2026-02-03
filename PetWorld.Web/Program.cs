@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PetWorld.Application.Configuration;
 using PetWorld.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,12 +13,19 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<PetWorldDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
+// Configure Agent Framework
+var agentConfig = builder.Configuration.GetSection("AgentSettings").Get<AgentConfiguration>();
+if (agentConfig != null)
+{
+    builder.Services.AddSingleton(agentConfig);
+}
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 

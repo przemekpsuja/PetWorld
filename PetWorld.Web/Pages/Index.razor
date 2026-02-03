@@ -1,4 +1,6 @@
+
 @page "/"
+@rendermode InteractiveServer
 @using PetWorld.Infrastructure.Data
 @using PetWorld.Domain.Entities
 @inject PetWorldDbContext DbContext
@@ -347,12 +349,16 @@
 
     private async Task SendQuestion()
     {
+        Console.WriteLine("=== SendQuestion WYWOŁANE ===");
         // Walidacja
         if (string.IsNullOrWhiteSpace(userQuestion))
         {
+            Console.WriteLine("Pytanie puste!");
             errorMessage = "Proszę wpisać pytanie przed wysłaniem.";
             return;
         }
+
+        Console.WriteLine($"Pytanie: {userQuestion}");
 
         try
         {
@@ -361,10 +367,17 @@
             aiResponse = string.Empty;
             isProcessing = true;
 
+            Console.WriteLine("Rozpoczynam przetwarzanie...");
+
             // Mock response (tymczasowy)
             await Task.Delay(1500); // Symulacja przetwarzania
+
+            Console.WriteLine("Po delay...");
+
             var mockResponse = $"Na podstawie Twojego pytania: '{userQuestion}' polecam sprawdzić produkty z kategorii Karma dla psów. Nasze najpopularniejsze produkty to Royal Canin i Brit Premium!";
             var mockIterations = 2;
+
+            Console.WriteLine("Zapisuję do bazy...");
 
             // Zapisz do bazy danych
             var chatHistory = new ChatHistory
@@ -378,20 +391,28 @@
             DbContext.ChatHistory.Add(chatHistory);
             await DbContext.SaveChangesAsync();
 
+            Console.WriteLine("Zapisano do bazy!");
+
+
             // Wyświetl odpowiedź
             aiResponse = mockResponse;
             iterationCount = mockIterations;
+
+            Console.WriteLine($"Ustawiono aiResponse: {aiResponse}");
 
             // Wyczyść pole tekstowe
             userQuestion = string.Empty;
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"BŁĄD: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
             errorMessage = $"Wystąpił błąd podczas przetwarzania zapytania: {ex.Message}";
         }
         finally
         {
             isProcessing = false;
+            Console.WriteLine("=== SendQuestion ZAKOŃCZONE ===");
         }
     }
 }
