@@ -36,6 +36,12 @@
     text-shadow: 0 4px 25px rgba(255, 255, 255, 0.6), 0 0 40px rgba(255, 255, 255, 0.4);
 }
 
+nav {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
 .oi, .bi {
     width: 2rem;
     font-size: 1.4rem;
