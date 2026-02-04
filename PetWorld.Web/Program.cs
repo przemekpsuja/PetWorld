@@ -28,4 +28,14 @@ app.UseAntiforgery();
 app.MapRazorComponents<PetWorld.Web.App>()
     .AddInteractiveServerRenderMode();
 
+// Migrate database during development
+if (app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<PetWorldDbContext>();
+        db.Database.Migrate();
+    }
+}
+
 app.Run();

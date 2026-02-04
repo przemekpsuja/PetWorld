@@ -16,6 +16,29 @@ services:
       timeout: 20s
       retries: 10
       interval: 10s
+    networks:
+      - petworld-network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: petworld-web
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=petworld;User=root;Password=root123;
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - petworld-network
+
+networks:
+  petworld-network:
+    driver: bridge
 
 volumes:
   mysql_data:
