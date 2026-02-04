@@ -6,6 +6,7 @@
 @using PetWorld.Application.Services
 @inject PetWorldDbContext DbContext
 @inject IChatService ChatService
+@inject IJSRuntime JSRuntime
 
 <PageTitle>PetWorld - Twój sklep zoologiczny</PageTitle>
 
@@ -313,7 +314,7 @@
     <!-- Response Card -->
     @if (!string.IsNullOrEmpty(aiResponse))
     {
-        <div class="row justify-content-center mt-5">
+        <div class="row justify-content-center mt-5" id="response-section">
             <div class="col-12">
                 <div class="card response-card">
                     <div class="response-header">
@@ -399,6 +400,10 @@
 
             // Wyczyść pole tekstowe
             userQuestion = string.Empty;
+
+            // Przewiń do odpowiedzi
+            await Task.Delay(100); // Krótkie opóźnienie, aby DOM się zaktualizował
+            await JSRuntime.InvokeVoidAsync("scrollToElement", "response-section");
         }
         catch (Exception ex)
         {
@@ -413,3 +418,12 @@
         }
     }
 }
+
+<script>
+    window.scrollToElement = function(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+</script>
