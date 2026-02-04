@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using PetWorld.Application.Configuration;
+using PetWorld.Application.Services;
+using PetWorld.Application.Services.Agents;
 using PetWorld.Infrastructure.Data;
+using PetWorld.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +22,12 @@ if (agentConfig != null)
 {
     builder.Services.AddSingleton(agentConfig);
 }
+
+// Register Agent Services
+builder.Services.AddSingleton<WriterAgent>();
+builder.Services.AddSingleton<CriticAgent>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IChatService, ChatService>();
 
 var app = builder.Build();
 

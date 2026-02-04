@@ -3,7 +3,9 @@
 @rendermode InteractiveServer
 @using PetWorld.Infrastructure.Data
 @using PetWorld.Domain.Entities
+@using PetWorld.Application.Services
 @inject PetWorldDbContext DbContext
+@inject IChatService ChatService
 
 <PageTitle>PetWorld - Twój sklep zoologiczny</PageTitle>
 
@@ -369,23 +371,18 @@
 
             Console.WriteLine("Rozpoczynam przetwarzanie...");
 
-            // Mock response (tymczasowy)
-            await Task.Delay(1500); // Symulacja przetwarzania
+            // Call ChatService to get AI response
+            var response = await ChatService.GetResponseAsync(userQuestion, CancellationToken.None);
 
-            Console.WriteLine("Po delay...");
-
-            var mockResponse = $"Na podstawie Twojego pytania: '{userQuestion}' polecam sprawdzić produkty z kategorii Karma dla psów. Nasze najpopularniejsze produkty to Royal Canin i Brit Premium!";
-            var mockIterations = 2;
-
-            Console.WriteLine("Zapisuję do bazy...");
+            Console.WriteLine($"Otrzymano odpowiedź AI (długość: {response.Answer.Length} znaków)");
 
             // Zapisz do bazy danych
             var chatHistory = new ChatHistory
             {
                 Date = DateTime.Now,
                 Question = userQuestion,
-                Answer = mockResponse,
-                IterationCount = mockIterations
+                Answer = response.Answer,
+                IterationCount = response.IterationCount
             };
 
             DbContext.ChatHistory.Add(chatHistory);
@@ -393,10 +390,9 @@
 
             Console.WriteLine("Zapisano do bazy!");
 
-
             // Wyświetl odpowiedź
-            aiResponse = mockResponse;
-            iterationCount = mockIterations;
+            aiResponse = response.Answer;
+            iterationCount = response.IterationCount;
 
             Console.WriteLine($"Ustawiono aiResponse: {aiResponse}");
 
