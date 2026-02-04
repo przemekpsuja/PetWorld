@@ -1,6 +1,8 @@
+using PetWorld.Application.DTOs;
+
 namespace PetWorld.Application.Services;
 
 public interface IProductRepository
 {
-    Task<List<object>> GetAllProductsAsync(CancellationToken ct);
+    Task<List<ProductDto>> GetAllProductsAsync(CancellationToken ct);
 }

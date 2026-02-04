@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PetWorld.Application.DTOs;
 using PetWorld.Application.Services;
 using PetWorld.Infrastructure.Data;
 
@@ -13,19 +14,19 @@ public class ProductRepository : IProductRepository
         _dbContext = dbContext;
     }
 
-    public async Task<List<object>> GetAllProductsAsync(CancellationToken ct)
+    public async Task<List<ProductDto>> GetAllProductsAsync(CancellationToken ct)
     {
         var products = await _dbContext.Products
-            .Select(p => new
+            .Select(p => new ProductDto
             {
-                p.Id,
-                p.Name,
-                p.Category,
-                p.Price,
-                p.Description
+                Id = p.Id,
+                Name = p.Name,
+                Category = p.Category,
+                Price = p.Price,
+                Description = p.Description
             })
             .ToListAsync(ct);
 
-        return products.Cast<object>().ToList();
+        return products;
     }
 }

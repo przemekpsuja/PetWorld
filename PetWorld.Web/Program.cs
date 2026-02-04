@@ -23,9 +23,9 @@ if (agentConfig != null)
     builder.Services.AddSingleton(agentConfig);
 }
 
-// Register Agent Services
-builder.Services.AddSingleton<WriterAgent>();
-builder.Services.AddSingleton<CriticAgent>();
+// Register Agent Services (Scoped for thread safety)
+builder.Services.AddScoped<WriterAgent>();
+builder.Services.AddScoped<CriticAgent>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IChatService, ChatService>();
 
@@ -54,5 +54,17 @@ if (app.Environment.IsDevelopment())
         db.Database.Migrate();
     }
 }
+
+// Log startup information
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("==============================================");
+    logger.LogInformation("🐾 PetWorld Application Started Successfully!");
+    logger.LogInformation("==============================================");
+    logger.LogInformation("📍 Application is available at: http://localhost:5000");
+    logger.LogInformation("🌍 Environment: {Environment}", app.Environment.EnvironmentName);
+    logger.LogInformation("==============================================");
+});
 
 app.Run();
