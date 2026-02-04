@@ -1,8 +1,5 @@
-using Azure;
-using Azure.AI.OpenAI;
-using OpenAI;
+using Microsoft.Extensions.Logging;
 using OpenAI.Chat;
-using PetWorld.Application.Configuration;
 using PetWorld.Application.Services.Agents.Models;
 using System.Text.RegularExpressions;
 
@@ -11,24 +8,12 @@ namespace PetWorld.Application.Services.Agents;
 public class CriticAgent
 {
     private readonly ChatClient _chatClient;
-    private readonly AgentConfiguration _config;
+    private readonly ILogger<CriticAgent> _logger;
 
-    public CriticAgent(AgentConfiguration config)
+    public CriticAgent(ChatClientFactory factory, ILogger<CriticAgent> logger)
     {
-        _config = config;
-
-        if (_config.ApiProvider == "AzureOpenAI")
-        {
-            var azureClient = new AzureOpenAIClient(
-                new Uri(_config.Endpoint),
-                new AzureKeyCredential(_config.ApiKey));
-            _chatClient = azureClient.GetChatClient(_config.DeploymentName);
-        }
-        else
-        {
-            var openAIClient = new OpenAIClient(_config.ApiKey);
-            _chatClient = openAIClient.GetChatClient(_config.Model);
-        }
+        _chatClient = factory.CreateChatClient();
+        _logger = logger;
     }
 
     public async Task<CriticFeedback> EvaluateAsync(string writerAnswer, CancellationToken ct)
@@ -69,10 +54,14 @@ Oceń tę odpowiedź według kryteriów z instrukcji systemowej.";
                     Feedback = match.Groups[2].Value.Trim()
                 };
             }
+
+            _logger.LogWarning("Critic response did not match expected format. Response: {Response}",
+                response.Length > 200 ? response.Substring(0, 200) + "..." : response);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // If parsing fails, return default feedback
+            _logger.LogWarning(ex, "Failed to parse critic response. Response length: {ResponseLength}",
+                response?.Length ?? 0);
         }
 
         // Default fallback if parsing fails

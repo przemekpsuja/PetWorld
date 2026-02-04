@@ -1,10 +1,11 @@
 using Microsoft.Extensions.Logging;
 using PetWorld.Application.Configuration;
+using PetWorld.Application.Contracts;
 using PetWorld.Application.Services.Agents;
 
 namespace PetWorld.Application.Services;
 
-public class ChatService : IChatService
+public class ChatService : Contracts.IChatService
 {
     private readonly AgentConfiguration _config;
     private readonly IProductRepository _productRepository;

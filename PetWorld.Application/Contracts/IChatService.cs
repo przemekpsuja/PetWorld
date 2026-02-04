@@ -1,4 +1,4 @@
-namespace PetWorld.Application.Services;
+namespace PetWorld.Application.Contracts;
 
 public interface IChatService
 {

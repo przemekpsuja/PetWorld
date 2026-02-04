@@ -1,8 +1,5 @@
-using Azure;
-using Azure.AI.OpenAI;
-using OpenAI;
+using Microsoft.Extensions.Logging;
 using OpenAI.Chat;
-using PetWorld.Application.Configuration;
 using PetWorld.Application.DTOs;
 using System.Text.Json;
 
@@ -11,24 +8,12 @@ namespace PetWorld.Application.Services.Agents;
 public class WriterAgent
 {
     private readonly ChatClient _chatClient;
-    private readonly AgentConfiguration _config;
+    private readonly ILogger<WriterAgent> _logger;
 
-    public WriterAgent(AgentConfiguration config)
+    public WriterAgent(ChatClientFactory factory, ILogger<WriterAgent> logger)
     {
-        _config = config;
-
-        if (_config.ApiProvider == "AzureOpenAI")
-        {
-            var azureClient = new AzureOpenAIClient(
-                new Uri(_config.Endpoint),
-                new AzureKeyCredential(_config.ApiKey));
-            _chatClient = azureClient.GetChatClient(_config.DeploymentName);
-        }
-        else
-        {
-            var openAIClient = new OpenAIClient(_config.ApiKey);
-            _chatClient = openAIClient.GetChatClient(_config.Model);
-        }
+        _chatClient = factory.CreateChatClient();
+        _logger = logger;
     }
 
     public async Task<string> GenerateAnswerAsync(
