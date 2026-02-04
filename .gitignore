@@ -56,3 +56,6 @@ nunit-*.xml
 
 # Custom prompts
 prompt.txt
+
+# Sensitive configuration files
+appsettings.Development.json
