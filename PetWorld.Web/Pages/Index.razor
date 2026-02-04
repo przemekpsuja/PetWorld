@@ -271,7 +271,8 @@
                     class="form-control form-control-lg chat-textarea"
                     rows="5"
                     placeholder="Np. Szukam karmy dla psa rasy golden retriever..."
-                    @bind="userQuestion"
+                    @bind-value="userQuestion"
+                    @bind-value:event="oninput"
                     @onkeydown="HandleKeyDown"
                     disabled="@isProcessing"></textarea>
             </div>
