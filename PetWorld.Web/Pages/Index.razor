@@ -1,270 +1,30 @@
 
 @page "/"
 @rendermode InteractiveServer
-@using PetWorld.Infrastructure.Data
-@using PetWorld.Domain.Entities
-@using PetWorld.Application.Services
-@inject PetWorldDbContext DbContext
+@implements IDisposable
+@using PetWorld.Application.Contracts
 @inject IChatService ChatService
+@inject IChatHistoryService ChatHistoryService
 @inject IJSRuntime JSRuntime
+@inject ILogger<Index> Logger
 
 <PageTitle>PetWorld - Twój sklep zoologiczny</PageTitle>
 
-<style>
-    .hero-section {
-        text-align: center;
-        padding: 3rem 1rem;
-        animation: fadeInDown 0.8s ease-out;
-    }
+<ErrorBoundary>
+    <ChildContent>
+        <div class="container-fluid py-4 position-relative">
+            <!-- Decorative Paws -->
+            <div class="paw-decoration paw-1">🐾</div>
+            <div class="paw-decoration paw-2">🐾</div>
+            <div class="paw-decoration paw-3">🐾</div>
 
-    .hero-title {
-        font-size: 3.5rem;
-        font-weight: 700;
-        color: #1a1a1a;
-        margin-bottom: 1rem;
-        text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8), 0 4px 8px rgba(255, 255, 255, 0.6), 0 8px 16px rgba(255, 255, 255, 0.4);
-        animation: float 3s ease-in-out infinite;
-    }
+            <!-- Hero Section -->
+            <div class="hero-section">
+                <h1 class="hero-title">🐾 Witaj w PetWorld!</h1>
+                <p class="hero-subtitle">Zapytaj naszego asystenta AI o produkty dla Twojego pupila</p>
+            </div>
 
-    .hero-subtitle {
-        font-size: 1.3rem;
-        color: #333333;
-        font-weight: 400;
-        text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
-    }
-
-    .glass-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        transition: all 0.4s ease;
-        animation: fadeInUp 0.8s ease-out;
-        max-width: 30%;
-        margin: 0 auto;
-    }
-
-    .glass-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
-    }
-
-    .chat-textarea {
-        border: 2px solid transparent;
-        border-radius: 16px;
-        resize: none;
-        font-size: 1.1rem;
-        transition: all 0.3s ease;
-        background: rgba(248, 249, 250, 0.8);
-        padding: 1rem;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .chat-textarea:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
-        background: white;
-        outline: none;
-    }
-
-    .send-button {
-        border-radius: 16px;
-        padding: 1rem 2rem;
-        font-size: 1.1rem;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .send-button::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
-    }
-
-    .send-button:hover::before {
-        width: 300px;
-        height: 300px;
-    }
-
-    .response-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        border-radius: 24px;
-        border: none;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        animation: slideInUp 0.5s ease-out;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .response-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    }
-
-    .response-header {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-        padding: 1.5rem;
-        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
-    }
-
-    .response-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #667eea;
-        margin: 0;
-    }
-
-    .iteration-badge {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        animation: pulse 2s ease-in-out infinite;
-    }
-
-    .response-body {
-        padding: 2rem;
-        font-size: 1.1rem;
-        line-height: 1.8;
-        color: #333;
-    }
-
-    .error-alert {
-        border-radius: 16px;
-        border: none;
-        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-        animation: shake 0.5s ease-in-out;
-    }
-
-    .paw-decoration {
-        position: absolute;
-        opacity: 0.1;
-        font-size: 8rem;
-        animation: float 6s ease-in-out infinite;
-    }
-
-    .paw-1 { top: 10%; right: 10%; animation-delay: 0s; }
-    .paw-2 { bottom: 10%; left: 10%; animation-delay: 2s; }
-    .paw-3 { top: 50%; right: 5%; animation-delay: 4s; }
-
-    @@keyframes fadeInDown {
-        from {
-            opacity: 0;
-            transform: translateY(-30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@keyframes slideInUp {
-        from {
-            opacity: 0;
-            transform: translateY(50px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@keyframes float {
-        0%, 100% {
-            transform: translateY(0);
-        }
-        50% {
-            transform: translateY(-20px);
-        }
-    }
-
-    @@keyframes pulse {
-        0%, 100% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.05);
-        }
-    }
-
-    @@keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-10px); }
-        75% { transform: translateX(10px); }
-    }
-
-    .spinner-custom {
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-top-color: white;
-        animation: spin 1s linear infinite;
-    }
-
-    @@keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    .button-container {
-        max-width: 15%;
-        margin: 20px auto 0;
-        display: grid;
-    }
-
-    @@media (max-width: 768px) {
-        .glass-card {
-            max-width: 90%;
-        }
-
-        .button-container {
-            max-width: 45%;
-        }
-    }
-</style>
-
-<div class="container-fluid py-4 position-relative">
-    <!-- Decorative Paws -->
-    <div class="paw-decoration paw-1">🐾</div>
-    <div class="paw-decoration paw-2">🐾</div>
-    <div class="paw-decoration paw-3">🐾</div>
-
-    <!-- Hero Section -->
-    <div class="hero-section">
-        <h1 class="hero-title">🐾 Witaj w PetWorld!</h1>
-        <p class="hero-subtitle">Zapytaj naszego asystenta AI o produkty dla Twojego pupila</p>
-    </div>
-
-    <!-- Question Form -->
+            <!-- Question Form -->
     <div class="row justify-content-center">
         <div class="col-12">
             <div class="glass-card p-4 p-md-5">
@@ -334,7 +94,19 @@
             </div>
         </div>
     }
-</div>
+        </div>
+    </ChildContent>
+    <ErrorContent>
+        <div class="container-fluid py-4">
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill me-2"></i>Wystąpił nieoczekiwany błąd</h4>
+                <p>Przepraszamy, aplikacja napotkała problem. Spróbuj odświeżyć stronę.</p>
+                <hr>
+                <p class="mb-0">Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.</p>
+            </div>
+        </div>
+    </ErrorContent>
+</ErrorBoundary>
 
 @code {
     private string userQuestion = string.Empty;
@@ -342,6 +114,18 @@
     private string errorMessage = string.Empty;
     private int iterationCount = 0;
     private bool isProcessing = false;
+    private CancellationTokenSource? _cancellationTokenSource;
+
+    protected override void OnInitialized()
+    {
+        _cancellationTokenSource = new CancellationTokenSource();
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+    }
 
     private async Task HandleKeyDown(KeyboardEventArgs e)
     {
@@ -353,79 +137,101 @@
 
     private async Task SendQuestion()
     {
-        Console.WriteLine("=== SendQuestion WYWOŁANE ===");
-        // Walidacja
-        if (string.IsNullOrWhiteSpace(userQuestion))
-        {
-            Console.WriteLine("Pytanie puste!");
-            errorMessage = "Proszę wpisać pytanie przed wysłaniem.";
-            return;
-        }
+        Logger.LogDebug("Processing user question");
 
-        Console.WriteLine($"Pytanie: {userQuestion}");
+        if (!ValidateQuestion())
+            return;
+
+        Logger.LogInformation("Processing question with length: {QuestionLength}", userQuestion.Length);
 
         try
         {
-            // Resetuj stan
-            errorMessage = string.Empty;
-            aiResponse = string.Empty;
+            ResetUIState();
             isProcessing = true;
 
-            Console.WriteLine("Rozpoczynam przetwarzanie...");
-
-            // Call ChatService to get AI response
-            var response = await ChatService.GetResponseAsync(userQuestion, CancellationToken.None);
-
-            Console.WriteLine($"Otrzymano odpowiedź AI (długość: {response.Answer.Length} znaków)");
-
-            // Zapisz do bazy danych
-            var chatHistory = new ChatHistory
-            {
-                Date = DateTime.Now,
-                Question = userQuestion,
-                Answer = response.Answer,
-                IterationCount = response.IterationCount
-            };
-
-            DbContext.ChatHistory.Add(chatHistory);
-            await DbContext.SaveChangesAsync();
-
-            Console.WriteLine("Zapisano do bazy!");
-
-            // Wyświetl odpowiedź
-            aiResponse = response.Answer;
-            iterationCount = response.IterationCount;
-
-            Console.WriteLine($"Ustawiono aiResponse: {aiResponse}");
-
-            // Wyczyść pole tekstowe
-            userQuestion = string.Empty;
-
-            // Wymuś odświeżenie UI przed scrollowaniem
-            StateHasChanged();
-
-            // Przewiń do odpowiedzi
-            await Task.Delay(300); // Dłuższe opóźnienie dla Blazor renderingu
-            try
-            {
-                await JSRuntime.InvokeVoidAsync("scrollToElement", "response-section");
-                Console.WriteLine("Wywołano scrollToElement");
-            }
-            catch (Exception scrollEx)
-            {
-                Console.WriteLine($"Błąd scrollowania: {scrollEx.Message}");
-            }
+            var response = await GetAIResponseAsync(_cancellationTokenSource!.Token);
+            await SaveChatHistoryAsync(response, _cancellationTokenSource!.Token);
+            UpdateUIWithResponse(response);
+            await ScrollToResponseAsync();
+        }
+        catch (OperationCanceledException)
+        {
+            Logger.LogInformation("Question processing was cancelled");
+            errorMessage = "Operacja została anulowana.";
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"BŁĄD: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            Logger.LogError(ex, "Error processing user question");
             errorMessage = $"Wystąpił błąd podczas przetwarzania zapytania: {ex.Message}";
         }
         finally
         {
             isProcessing = false;
-            Console.WriteLine("=== SendQuestion ZAKOŃCZONE ===");
+            Logger.LogDebug("Question processing completed");
+        }
+    }
+
+    private bool ValidateQuestion()
+    {
+        if (string.IsNullOrWhiteSpace(userQuestion))
+        {
+            Logger.LogDebug("Question validation failed: empty question");
+            errorMessage = "Proszę wpisać pytanie przed wysłaniem.";
+            return false;
+        }
+        return true;
+    }
+
+    private void ResetUIState()
+    {
+        errorMessage = string.Empty;
+        aiResponse = string.Empty;
+    }
+
+    private async Task<ChatResponse> GetAIResponseAsync(CancellationToken cancellationToken)
+    {
+        Logger.LogDebug("Invoking ChatService for question processing");
+        var response = await ChatService.GetResponseAsync(userQuestion, cancellationToken);
+
+        Logger.LogInformation("Received AI response with {AnswerLength} characters after {IterationCount} iterations",
+            response.Answer.Length, response.IterationCount);
+
+        return response;
+    }
+
+    private async Task SaveChatHistoryAsync(ChatResponse response, CancellationToken cancellationToken)
+    {
+        await ChatHistoryService.SaveAsync(
+            userQuestion,
+            response.Answer,
+            response.IterationCount,
+            cancellationToken);
+
+        Logger.LogDebug("Chat history saved to database");
+    }
+
+    private void UpdateUIWithResponse(ChatResponse response)
+    {
+        aiResponse = response.Answer;
+        iterationCount = response.IterationCount;
+        userQuestion = string.Empty;
+
+        Logger.LogDebug("UI state updated with response");
+    }
+
+    private async Task ScrollToResponseAsync()
+    {
+        StateHasChanged();
+        await Task.Delay(300); // Allow time for Blazor rendering
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("scrollToElement", "response-section");
+            Logger.LogDebug("Auto-scroll to response section triggered");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to auto-scroll to response section");
         }
     }
 }

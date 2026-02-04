@@ -1,148 +1,26 @@
 @page "/historia"
 @rendermode InteractiveServer
-@using PetWorld.Infrastructure.Data
+@implements IDisposable
+@using PetWorld.Application.Contracts
 @using PetWorld.Domain.Entities
-@using Microsoft.EntityFrameworkCore
-@inject PetWorldDbContext DbContext
+@inject IChatHistoryService ChatHistoryService
 
 <PageTitle>Historia - PetWorld</PageTitle>
 
-<style>
-    .hero-section {
-        text-align: center;
-        padding: 3rem 1rem;
-        animation: fadeInDown 0.8s ease-out;
-    }
+<ErrorBoundary>
+    <ChildContent>
+        <div class="container-fluid py-4 position-relative">
+            <!-- Decorative Paws -->
+            <div class="paw-decoration paw-1">🐾</div>
+            <div class="paw-decoration paw-2">🐾</div>
+            <div class="paw-decoration paw-3">🐾</div>
 
-    .hero-title {
-        font-size: 3.5rem;
-        font-weight: 700;
-        color: #1a1a1a;
-        margin-bottom: 1rem;
-        text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8), 0 4px 8px rgba(255, 255, 255, 0.6), 0 8px 16px rgba(255, 255, 255, 0.4);
-        animation: float 3s ease-in-out infinite;
-    }
+            <!-- Hero Section -->
+            <div class="hero-section">
+                <h1 class="hero-title">📜 Historia rozmów</h1>
+            </div>
 
-    .glass-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        transition: all 0.4s ease;
-        animation: fadeInUp 0.8s ease-out;
-        padding: 2rem;
-    }
-
-    .glass-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
-    }
-
-    .history-table {
-        border-collapse: separate;
-        border-spacing: 0;
-        overflow: hidden;
-        border-radius: 16px;
-    }
-
-    .history-table thead {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-    .history-table thead th {
-        padding: 1.2rem;
-        font-weight: 600;
-        border: none;
-    }
-
-    .history-table tbody tr {
-        background: white;
-        transition: all 0.3s ease;
-    }
-
-    .history-table tbody tr:hover {
-        background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-        transform: scale(1.01);
-    }
-
-    .history-table tbody td {
-        padding: 1rem;
-        border-bottom: 1px solid rgba(102, 126, 234, 0.1);
-        vertical-align: middle;
-    }
-
-    .paw-decoration {
-        position: absolute;
-        opacity: 0.1;
-        font-size: 8rem;
-        animation: float 6s ease-in-out infinite;
-    }
-
-    .paw-1 { top: 10%; right: 10%; animation-delay: 0s; }
-    .paw-2 { bottom: 10%; left: 10%; animation-delay: 2s; }
-    .paw-3 { top: 50%; right: 5%; animation-delay: 4s; }
-
-    .empty-state {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-        border-radius: 16px;
-        border: 2px dashed rgba(102, 126, 234, 0.3);
-        padding: 3rem;
-        text-align: center;
-        animation: fadeInUp 0.8s ease-out;
-    }
-
-    .empty-state i {
-        font-size: 4rem;
-        color: #667eea;
-        margin-bottom: 1rem;
-    }
-
-    @@keyframes fadeInDown {
-        from {
-            opacity: 0;
-            transform: translateY(-30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@keyframes float {
-        0%, 100% {
-            transform: translateY(0);
-        }
-        50% {
-            transform: translateY(-20px);
-        }
-    }
-</style>
-
-<div class="container-fluid py-4 position-relative">
-    <!-- Decorative Paws -->
-    <div class="paw-decoration paw-1">🐾</div>
-    <div class="paw-decoration paw-2">🐾</div>
-    <div class="paw-decoration paw-3">🐾</div>
-
-    <!-- Hero Section -->
-    <div class="hero-section">
-        <h1 class="hero-title">📜 Historia rozmów</h1>
-    </div>
-
-    @if (chatHistories == null)
+            @if (chatHistories == null)
     {
         <div class="text-center">
             <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
@@ -196,15 +74,44 @@
             </div>
         </div>
     }
-</div>
+        </div>
+    </ChildContent>
+    <ErrorContent>
+        <div class="container-fluid py-4">
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill me-2"></i>Wystąpił nieoczekiwany błąd</h4>
+                <p>Przepraszamy, nie udało się załadować historii rozmów. Spróbuj odświeżyć stronę.</p>
+                <hr>
+                <p class="mb-0">Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.</p>
+            </div>
+        </div>
+    </ErrorContent>
+</ErrorBoundary>
 
 @code {
     private List<ChatHistory>? chatHistories;
+    private CancellationTokenSource? _cancellationTokenSource;
+
+    protected override void OnInitialized()
+    {
+        _cancellationTokenSource = new CancellationTokenSource();
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        chatHistories = await DbContext.ChatHistory
-            .OrderByDescending(ch => ch.Date)
-            .ToListAsync();
+        try
+        {
+            chatHistories = await ChatHistoryService.GetAllAsync(_cancellationTokenSource!.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            // Component was disposed before data loaded, this is expected
+        }
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
     }
 }

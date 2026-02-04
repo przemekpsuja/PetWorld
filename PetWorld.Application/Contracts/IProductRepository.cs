@@ -1,6 +1,6 @@
 using PetWorld.Application.DTOs;
 
-namespace PetWorld.Application.Services;
+namespace PetWorld.Application.Contracts;
 
 public interface IProductRepository
 {

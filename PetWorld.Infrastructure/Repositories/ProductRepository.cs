@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using PetWorld.Application.Contracts;
 using PetWorld.Application.DTOs;
-using PetWorld.Application.Services;
 using PetWorld.Infrastructure.Data;
 
 namespace PetWorld.Infrastructure.Repositories;
