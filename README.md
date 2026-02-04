@@ -228,22 +228,6 @@ To test the application:
 4. Check the iteration count badge to see how many refinements were made
 5. View conversation history at `/historia`
 
-## ✅ Recent Improvements
-
-The following improvements have been implemented to enhance code quality and maintainability:
-
-- ✅ **IChatHistoryService** - Abstraction layer created, DbContext removed from UI layer
-- ✅ **Moved Repository Interfaces** - All interfaces relocated to `Application/Contracts/`
-- ✅ **ChatClientFactory** - Eliminated code duplication in agent initialization
-- ✅ **Structured Logging** - Replaced Console.WriteLine with ILogger throughout
-- ✅ **CSS Extraction** - Moved all inline styles to scoped stylesheets (Index.razor.css, History.razor.css)
-- ✅ **Removed Unused Packages** - Cleaned up `Microsoft.Agents.AI.*` preview packages
-- ✅ **Error Boundaries** - Added Blazor ErrorBoundary components for graceful error handling
-- ✅ **CancellationToken Propagation** - Proper cancellation support through all layers
-- ✅ **Code Refactoring** - Split large methods into focused, single-responsibility functions
-
-**Code Quality Score**: 9.0/10 (improved from 7.6/10)
-
 ## 🎯 Roadmap & Future Improvements
 
 ### High Priority
