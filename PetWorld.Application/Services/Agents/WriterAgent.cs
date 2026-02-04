@@ -3,6 +3,7 @@ using Azure.AI.OpenAI;
 using OpenAI;
 using OpenAI.Chat;
 using PetWorld.Application.Configuration;
+using PetWorld.Application.DTOs;
 using System.Text.Json;
 
 namespace PetWorld.Application.Services.Agents;
@@ -32,7 +33,7 @@ public class WriterAgent
 
     public async Task<string> GenerateAnswerAsync(
         string question,
-        List<object> products,
+        List<ProductDto> products,
         string? previousFeedback,
         CancellationToken ct)
     {

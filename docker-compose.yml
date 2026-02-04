@@ -5,14 +5,14 @@ services:
     image: mysql:8.0
     container_name: petworld-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: petworld
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot123"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p$${MYSQL_ROOT_PASSWORD}"]
       timeout: 20s
       retries: 10
       interval: 10s
@@ -29,7 +29,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=petworld;User=root;Password=root123;
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=${MYSQL_DATABASE};User=root;Password=${MYSQL_ROOT_PASSWORD};
+      - AgentSettings__ApiProvider=${AGENT_API_PROVIDER}
+      - AgentSettings__ApiKey=${AGENT_API_KEY}
+      - AgentSettings__Endpoint=${AGENT_ENDPOINT}
+      - AgentSettings__DeploymentName=${AGENT_DEPLOYMENT_NAME}
+      - AgentSettings__MaxIterations=${AGENT_MAX_ITERATIONS}
     depends_on:
       mysql:
         condition: service_healthy

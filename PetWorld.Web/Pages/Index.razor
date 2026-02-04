@@ -6,6 +6,7 @@
 @using PetWorld.Application.Services
 @inject PetWorldDbContext DbContext
 @inject IChatService ChatService
+@inject IJSRuntime JSRuntime
 
 <PageTitle>PetWorld - Twój sklep zoologiczny</PageTitle>
 
@@ -271,7 +272,8 @@
                     class="form-control form-control-lg chat-textarea"
                     rows="5"
                     placeholder="Np. Szukam karmy dla psa rasy golden retriever..."
-                    @bind="userQuestion"
+                    @bind-value="userQuestion"
+                    @bind-value:event="oninput"
                     @onkeydown="HandleKeyDown"
                     disabled="@isProcessing"></textarea>
             </div>
@@ -312,7 +314,7 @@
     <!-- Response Card -->
     @if (!string.IsNullOrEmpty(aiResponse))
     {
-        <div class="row justify-content-center mt-5">
+        <div class="row justify-content-center mt-5" id="response-section">
             <div class="col-12">
                 <div class="card response-card">
                     <div class="response-header">
@@ -398,6 +400,21 @@
 
             // Wyczyść pole tekstowe
             userQuestion = string.Empty;
+
+            // Wymuś odświeżenie UI przed scrollowaniem
+            StateHasChanged();
+
+            // Przewiń do odpowiedzi
+            await Task.Delay(300); // Dłuższe opóźnienie dla Blazor renderingu
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("scrollToElement", "response-section");
+                Console.WriteLine("Wywołano scrollToElement");
+            }
+            catch (Exception scrollEx)
+            {
+                Console.WriteLine($"Błąd scrollowania: {scrollEx.Message}");
+            }
         }
         catch (Exception ex)
         {
