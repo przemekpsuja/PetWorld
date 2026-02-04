@@ -33,7 +33,7 @@ PetWorld is an intelligent pet shop assistant application that helps customers f
    cd PetWorld
    ```
 
-2. **Configure environment variables (REQUIRED)**
+2. **Configure environment variables**
 
    Copy `.env.example` to `.env` and fill in your credentials:
    ```bash
