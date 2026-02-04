@@ -401,9 +401,20 @@
             // Wyczyść pole tekstowe
             userQuestion = string.Empty;
 
+            // Wymuś odświeżenie UI przed scrollowaniem
+            StateHasChanged();
+
             // Przewiń do odpowiedzi
-            await Task.Delay(100); // Krótkie opóźnienie, aby DOM się zaktualizował
-            await JSRuntime.InvokeVoidAsync("scrollToElement", "response-section");
+            await Task.Delay(300); // Dłuższe opóźnienie dla Blazor renderingu
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("scrollToElement", "response-section");
+                Console.WriteLine("Wywołano scrollToElement");
+            }
+            catch (Exception scrollEx)
+            {
+                Console.WriteLine($"Błąd scrollowania: {scrollEx.Message}");
+            }
         }
         catch (Exception ex)
         {
@@ -418,12 +429,3 @@
         }
     }
 }
-
-<script>
-    window.scrollToElement = function(elementId) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }
-</script>
